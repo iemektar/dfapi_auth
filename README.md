@@ -138,11 +138,53 @@ child: DfApiApp(
           child: Text("Log Out"),
         )),
     configuration: demoIdentityServerConfig,
-    loginWidget: LoginPage(),
-    loadingWidget: Text("Loading ...")
+    loginWidget: LoginPage(), // ->  İsteğe Bağlı
+    loadingWidget: Text("Loading ..."), // ->  İsteğe Bağlı
+    callBack: (String token, DfApiUserInfo userInfo) { //... }, // ->  İsteğe Bağlı
+    splashWidget: Container(), // -> Uygulama ilk açıldığında loading yerine kullanılır (isteğe bağlı)
   ),
 ),
 
 ...        
   
 ```
+
+Kullanıcı giriş yaptıktan sonra token veya kullanıcı bilgilerine ihtiyacınız varsa request' te bulunan callBack parametresine ***Function(String, DfApiUserInfo)*** tipinde fonksiyon geçirilerek token ve kullanıcının claims gibi diğer bilgilerine ulaşabilirsiniz.
+
+callBack fonskiyonundan alınan token aşağıdaki gibi api çağrılarında kullanılmak üzere ayarlanabilir.
+
+```dart
+...
+
+child: DfApiApp(
+  request: DfApiAuthRequest(
+    ...
+    callBack: apiHelperInitializer,
+    ...
+  ),
+),
+
+...
+
+void apiHelperInitializer(String token, DfApiUserInfo userInfo) {
+  if (GetIt.I.isRegistered<ApiHelper>()) return;
+
+  var uri = Uri.parse("api url");
+  List<ApiHelperPathItem> paths = [
+    ApiHelperPathItem.get("Key", "Path/SamplePath"),
+  ];
+
+  var apiHelper = ApiHelper.setup(
+    uri,
+    token,
+    paths,
+    responseResolverFunc: (json) => (json) { //... },
+  );
+  GetIt.I.registerLazySingleton<ApiHelper>(() => apiHelper);
+}
+
+```
+---
+Api çağrıları için ***api_helper*** paketi kullanılabilir. 
+
+https://pub.dev/packages/api_helper
