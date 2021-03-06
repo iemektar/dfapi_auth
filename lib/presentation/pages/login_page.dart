@@ -17,7 +17,7 @@ class LoginPage extends StatelessWidget {
         children: [
           Container(
             width: size.width * .7,
-            child: FlatButton.icon(
+            child: TextButton.icon(
               onPressed: () {
                 DfApiApp.functions.logIn();
               },
@@ -26,14 +26,8 @@ class LoginPage extends StatelessWidget {
                 "Log In",
                 style: TextStyle(fontSize: 20),
               ),
-              color: Colors.blue,
-              textColor: Colors.white,
-              height: 40,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(7),
-              ),
             ),
-          )
+          ),
         ],
       ),
     );

@@ -1,8 +1,7 @@
 name: dfapi_auth
-description: DfApi Authetication
-version: 0.1.7
+description: DfApi Authetication based on flutter_appauth package and identity server.
+version: 0.1.8
 repository: https://github.com/iemektar/dfapi_auth
-homepage: https://iemektar.github.io/dfapi_auth
 
 environment:
   sdk: ">=2.7.0 <3.0.0"

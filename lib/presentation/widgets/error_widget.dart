@@ -8,7 +8,9 @@ class DfApiErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Container(
+      width: size.width * .90,
       alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -29,22 +31,30 @@ class DfApiErrorWidget extends StatelessWidget {
             indent: 50,
             endIndent: 50,
           ),
-          FlatButton(
+          TextButton(
             onPressed: () {
-              DfApiApp.functions.logIn();
+              DfApiApp.functions.logOut();
             },
-            color: Colors.blue,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              child: Text(
-                "Try Login",
-                style: TextStyle(color: Colors.white),
+            child: Text(
+              "Login Page",
+              style: TextStyle(color: Colors.white),
+            ),
+            style: ButtonStyle(
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              foregroundColor: MaterialStateProperty.all(Colors.white),
+              padding: MaterialStateProperty.all(
+                EdgeInsets.symmetric(vertical: 10, horizontal: 50),
+              ),
+              overlayColor: MaterialStateProperty.all(
+                Colors.white.withOpacity(.15),
               ),
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-          )
+          ),
         ],
       ),
     );
