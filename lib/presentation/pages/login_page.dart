@@ -19,7 +19,7 @@ class LoginPage extends StatelessWidget {
             width: size.width * .7,
             child: TextButton.icon(
               onPressed: () {
-                DfApiApp.functions.logIn();
+                DfApiApp.functions.logIn("", "");
               },
               icon: Icon(Icons.lock_open_outlined),
               label: Text(

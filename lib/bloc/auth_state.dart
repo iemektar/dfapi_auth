@@ -1,4 +1,6 @@
+import 'package:dfapi_auth/models/authentication_response.dart';
 import 'package:dfapi_auth/models/dfapi_user_info.dart';
+import 'package:dfapi_auth/models/response.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class AuthState extends Equatable {
@@ -25,14 +27,18 @@ class Authenticated extends AuthState {
 
   Authenticated(this.token, this.userInfo);
 
+  Authenticated.fromResponse(Response<AuthenticationResponse> response)
+      : token = response.value.token,
+        userInfo = response.value.userInfo;
+
   @override
   List<Object> get props => [token];
 }
 
-class AuthenticationFailed extends AuthState {
+class Failed extends AuthState {
   final String message;
 
-  AuthenticationFailed(this.message);
+  Failed(this.message);
 
   @override
   List<Object> get props => [message];

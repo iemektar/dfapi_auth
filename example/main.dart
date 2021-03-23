@@ -11,11 +11,8 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  var demoIdentityServerConfig = AuthConfiguration(
-    issuer: "https://demo.identityserver.io",
-    clientId: "interactive.public",
-    redirectUrl: "io.identityserver.demo:/oauthredirect",
-    scopes: ['openid', 'profile', 'email', 'offline_access', 'api'],
+  var demoIdentityServerConfig = AuthConfig(
+    address: "https://demo.identityserver.io",
   );
 
   @override

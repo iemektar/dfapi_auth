@@ -46,10 +46,11 @@ class _DfApiApp extends State<DfApiApp> {
 
   @override
   void initState() {
-    authBloc = AuthBloc(authRepository: authRepository);
-    authBloc.add(AuthEvent.AppStarted);
+    authBloc = AuthBloc(authRepository)..add(AppStarted());
     super.initState();
   }
+
+  Widget get loadingWidget => widget.request.loadingWidget ?? LoadingWidget();
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +60,11 @@ class _DfApiApp extends State<DfApiApp> {
         create: (_) => authBloc,
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (BuildContext context, AuthState state) {
-            if (state is UnInitialized)
-              return request.loadingWidget ?? LoadingWidget();
+            if (state is UnInitialized) return loadingWidget;
             if (state is Loading) {
               if (state.showSplash && request.splashWidget != null)
                 return request.splashWidget;
-              return request.loadingWidget ?? LoadingWidget();
+              return loadingWidget;
             } else if (state is UnAuthenticated)
               return request.loginWidget ?? LoginPage();
             else if (state is Authenticated) {
@@ -74,7 +74,7 @@ class _DfApiApp extends State<DfApiApp> {
               if (request.callBack != null)
                 request.callBack(state.token, state.userInfo);
               return request.child;
-            } else if (state is AuthenticationFailed) {
+            } else if (state is Failed) {
               return DfApiErrorWidget(message: state.message);
             }
 

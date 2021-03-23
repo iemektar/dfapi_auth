@@ -1,55 +1,49 @@
+import 'package:dfapi_auth/data/repository_contracts/auth_repository_contract.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
-
-import '../data/repositories/auth_repository.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository authRepository;
-  AuthBloc({@required this.authRepository}) : super(UnInitialized());
+  final AuthRepositoryContract _authRepository;
+  AuthBloc(this._authRepository) : super(UnInitialized());
 
   @override
   Stream<AuthState> mapEventToState(AuthEvent event) async* {
-    switch (event) {
-      case AuthEvent.AppStarted:
-        yield Loading(true);
-        var hasAuthenticated = await authRepository.hasAuthenticated();
-        if (hasAuthenticated) {
-          var hasTokenExpired = await authRepository.hasTokenExpired();
-          if (hasTokenExpired)
-            add(AuthEvent.BeforeLogIn);
-          else {
-            var token = await authRepository.getToken();
-            var userInfo = await authRepository.getUserInfo();
+    if (event is AppStarted) {
+      yield Loading(true);
+      if (!GetIt.I.isRegistered<SharedPreferences>()) {
+        var pref = await SharedPreferences.getInstance();
+        GetIt.I.registerLazySingleton<SharedPreferences>(() => pref);
+      }
 
-            if (!token.isSuccess || !userInfo.isSuccess)
-              yield AuthenticationFailed("Auth data has corrupted.");
-            else
-              yield Authenticated(token.value, userInfo.value);
-          }
-        } else
-          yield UnAuthenticated();
-        break;
+      var authDataResponse = _authRepository.getAuthData();
 
-      case AuthEvent.BeforeLogIn:
-        yield Loading(false);
-        var response = await authRepository.authenticate();
-        if (response.isSuccess)
-          yield Authenticated(response.value.token, response.value.userInfo);
-        else
-          yield AuthenticationFailed(response.errorMessage);
-        break;
-
-      case AuthEvent.LoggedOut:
-        yield Loading(false);
-        await authRepository.logOut();
+      if (!authDataResponse.isSuccess)
         yield UnAuthenticated();
-        break;
+      else
+        yield Authenticated.fromResponse(authDataResponse);
 
-      default:
-        yield UnInitialized();
-        break;
+      yield UnAuthenticated();
+    } else if (event is LogIn) {
+      yield Loading(false);
+      var response = await _authRepository.authenticate(
+        event.username,
+        event.password,
+      );
+
+      if (response.isSuccess)
+        yield Authenticated.fromResponse(response);
+      else
+        yield Failed(response.errorMessage);
+    } else {
+      yield Loading(false);
+      var response = await _authRepository.logOut();
+      if (response.isSuccess)
+        yield UnAuthenticated();
+      else
+        yield Failed(response.errorMessage);
     }
   }
 }

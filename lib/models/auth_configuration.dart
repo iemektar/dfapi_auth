@@ -1,29 +1,22 @@
-import 'package:flutter_appauth/flutter_appauth.dart';
+import 'package:meta/meta.dart';
 
-class AuthConfiguration {
-  final String issuer;
-  final String clientId;
-  final String redirectUrl;
-  String discoveryUrl;
+class AuthConfig {
+  String _address;
+  String _loginPath;
+  String _logoutPath;
 
-  final List<String> scopes;
+  AuthConfig({
+    @required String address,
+    String loginPath = "auth/login",
+    String logoutPath = "auth/logout",
+  })  : _address = address,
+        _loginPath = loginPath,
+        _logoutPath = logoutPath;
 
-  AuthorizationServiceConfiguration _serviceConfiguration;
+  String get address => _address;
+  String get loginPath => _loginPath;
+  String get logoutPath => _logoutPath;
 
-  AuthConfiguration({
-    this.issuer,
-    this.clientId,
-    this.redirectUrl,
-    this.scopes,
-  }) {
-    _serviceConfiguration = AuthorizationServiceConfiguration(
-      '$issuer/connect/authorize',
-      '$issuer/connect/token',
-    );
-
-    discoveryUrl = "$issuer/.well-known/openid-configuration";
-  }
-
-  AuthorizationServiceConfiguration get serviceConfiguration =>
-      _serviceConfiguration;
+  String get loginUrl => (_address + "/" + _loginPath).replaceAll("//", "/");
+  String get logutUrl => (_address + "/" + _logoutPath).replaceAll("//", "/");
 }

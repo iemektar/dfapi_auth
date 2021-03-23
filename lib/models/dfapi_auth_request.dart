@@ -5,7 +5,7 @@ import 'auth_configuration.dart';
 
 class DfApiAuthRequest {
   final Widget child;
-  final AuthConfiguration configuration;
+  final AuthConfig configuration;
   final Widget loginWidget;
   final Widget loadingWidget;
   final Widget splashWidget;
