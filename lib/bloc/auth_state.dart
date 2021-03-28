@@ -1,6 +1,6 @@
 import 'package:dfapi_auth/models/authentication_response.dart';
 import 'package:dfapi_auth/models/dfapi_user_info.dart';
-import 'package:dfapi_auth/models/response.dart';
+import 'package:custom_response/custom_response.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class AuthState extends Equatable {

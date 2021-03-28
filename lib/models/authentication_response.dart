@@ -8,5 +8,11 @@ class AuthenticationResponse {
       : this.token = token,
         this.userInfo = userInfo;
 
-  AuthenticationResponse.fromJson(dynamic json);
+  AuthenticationResponse.fromJson(Map<String, dynamic> json) {
+    if (json["isSuccess"]) {
+      var data = json["data"];
+      token = data["accessToken"];
+      userInfo = DfApiUserInfo.fromJson(data);
+    }
+  }
 }

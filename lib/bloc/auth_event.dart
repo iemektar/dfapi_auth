@@ -1,3 +1,4 @@
+import 'package:dfapi_auth/models/login_model.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class AuthEvent extends Equatable {}
@@ -8,13 +9,11 @@ class AppStarted extends AuthEvent {
 }
 
 class LogIn extends AuthEvent {
-  final String username;
-  final String password;
-
-  LogIn(this.username, this.password);
+  final LoginModel model;
+  LogIn(this.model);
 
   @override
-  List<Object> get props => [username, password];
+  List<Object> get props => [model.username, model.password];
 }
 
 class LogOut extends AuthEvent {

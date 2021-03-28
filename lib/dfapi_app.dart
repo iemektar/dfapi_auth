@@ -1,6 +1,6 @@
 import 'package:dfapi_auth/models/dfapi_user_info.dart';
 import 'package:dfapi_auth/presentation/pages/login_page.dart';
-import 'package:dfapi_auth/presentation/widgets/error_widget.dart';
+import 'package:dfapi_auth/presentation/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -50,6 +50,12 @@ class _DfApiApp extends State<DfApiApp> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    authBloc.close();
+    super.dispose();
+  }
+
   Widget get loadingWidget => widget.request.loadingWidget ?? LoadingWidget();
 
   @override
@@ -75,10 +81,10 @@ class _DfApiApp extends State<DfApiApp> {
                 request.callBack(state.token, state.userInfo);
               return request.child;
             } else if (state is Failed) {
-              return DfApiErrorWidget(message: state.message);
+              return DfApiErrorPage(message: state.message);
             }
 
-            return DfApiErrorWidget(message: "Unexpected error has occured!");
+            return DfApiErrorPage(message: "Unexpected error has occured!");
           },
         ),
       ),

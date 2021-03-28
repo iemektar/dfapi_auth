@@ -11,12 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^6.1.1
-  flutter_appauth: ^0.9.2+6
   get_it: ^5.0.6
   shared_preferences: ^0.5.12+4
   http: ^0.12.2
-  meta: ^1.2.4
   equatable: ^1.2.6
+  custom_response: ^0.0.1
+  flutter_icons: ^1.1.0
 
 dev_dependencies:
   flutter_test:

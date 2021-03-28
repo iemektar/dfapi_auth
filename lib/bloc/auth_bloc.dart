@@ -24,14 +24,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         yield UnAuthenticated();
       else
         yield Authenticated.fromResponse(authDataResponse);
-
-      yield UnAuthenticated();
     } else if (event is LogIn) {
       yield Loading(false);
-      var response = await _authRepository.authenticate(
-        event.username,
-        event.password,
-      );
+      var response = await _authRepository.authenticate(event.model);
 
       if (response.isSuccess)
         yield Authenticated.fromResponse(response);

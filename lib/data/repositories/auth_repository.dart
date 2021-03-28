@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:dfapi_auth/models/dfapi_user_info.dart';
+import 'package:dfapi_auth/models/login_model.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:custom_response/custom_response.dart';
 
 import '../../models/auth_configuration.dart';
-import '../../models/response.dart';
 import '../../models/authentication_response.dart';
 import '../repository_contracts/auth_repository_contract.dart';
 
@@ -16,22 +17,25 @@ class AuthRepository implements AuthRepositoryContract {
   final String _tokenExpireDateKey = "DfApiAuthTokeExpireDateKey";
   final String _userInfoKey = "DfApiAuthUserInfoKey";
 
+  final String _usernameKey = "DfApiAuthUsernameKey";
+  final String _passwordKey = "DfApiAuthPasswordKey";
+
   SharedPreferences _pref;
 
   AuthRepository(this.config) : _pref = GetIt.I<SharedPreferences>();
 
   @override
   Future<Response<AuthenticationResponse>> authenticate(
-      String username, String password) async {
+      LoginModel model) async {
     try {
       var data = {
-        "Username": username,
-        "Password": password,
+        "Username": model.username,
+        "Password": model.password,
       };
       final http.Response loginResponse = await http.post(
         config.loginUrl,
-        body: data,
         headers: {"content-type": "application/json"},
+        body: jsonEncode(data),
       );
 
       if (loginResponse.statusCode != 200)
@@ -46,6 +50,8 @@ class AuthRepository implements AuthRepositoryContract {
 
       await _pref.setString(_tokenKey, response.token);
       await _pref.setString(_userInfoKey, jsonEncode(response.userInfo.asJson));
+      await _pref.setString(_usernameKey, model.username);
+      await _pref.setString(_passwordKey, model.password);
 
       return Response.success(response);
     } catch (e) {
@@ -59,20 +65,15 @@ class AuthRepository implements AuthRepositoryContract {
   Future<Response> logOut() async {
     try {
       var token = _pref.getString(_tokenKey);
-      final http.Response response = await http.get(
-        config.logutUrl,
-        headers: {"Authorization": "Bearer $token"},
-      );
 
-      if (response.statusCode != 200)
-        return Response.error(
-          "Unexpected Error Has Occured!\n" +
-              "STATUS CODE: ${response.statusCode}\n" +
-              "${response.reasonPhrase}",
+      if (!config.isRootPath(config.logutUrl)) {
+        await http.get(
+          config.logutUrl,
+          headers: {"Authorization": "Bearer $token"},
         );
+      }
 
       await clearData();
-
       return Response();
     } catch (e) {
       return Response.error(
