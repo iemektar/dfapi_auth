@@ -9,5 +9,9 @@ abstract class AuthRepositoryContract {
 
   Future clearData();
 
+  Response<LoginModel> getLoginData();
+
   Response<AuthenticationResponse> getAuthData();
+
+  Future<Response<AuthenticationResponse>> refreshToken();
 }

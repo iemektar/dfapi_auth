@@ -20,9 +20,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       var authDataResponse = _authRepository.getAuthData();
 
-      if (!authDataResponse.isSuccess)
-        yield UnAuthenticated();
-      else
+      if (!authDataResponse.isSuccess) {
+        var loginDataResponse = _authRepository.getLoginData();
+        if (!loginDataResponse.isSuccess)
+          yield UnAuthenticated();
+        else {
+          add(LogIn(loginDataResponse.value));
+        }
+      } else
         yield Authenticated.fromResponse(authDataResponse);
     } else if (event is LogIn) {
       yield Loading(false);
@@ -32,6 +37,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         yield Authenticated.fromResponse(response);
       else
         yield Failed(response.errorMessage);
+    } else if (event is TokenExpired) {
+      var response = await _authRepository.refreshToken();
+      if (!response.isSuccess) yield Failed(response.errorMessage);
+      yield Authenticated.fromResponse(response);
     } else {
       yield Loading(false);
       var response = await _authRepository.logOut();

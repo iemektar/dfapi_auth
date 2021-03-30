@@ -1,17 +1,23 @@
-import 'package:dfapi_auth/models/dfapi_user_info.dart';
-import 'package:dfapi_auth/presentation/pages/login_page.dart';
-import 'package:dfapi_auth/presentation/pages/error_page.dart';
+import 'dart:async';
+
+import 'dfapi_app_functions.dart';
+import 'models/dfapi_user_info.dart';
+import 'models/dfapi_auth_request.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'dfapi_app_functions.dart';
+
+import 'presentation/pages/error_page.dart';
+import 'presentation/pages/login_page.dart';
 import 'presentation/widgets/loading_widget.dart';
+
 import 'bloc/auth_bloc.dart';
 import 'bloc/auth_event.dart';
 import 'bloc/auth_state.dart';
+
 import 'data/repositories/auth_repository.dart';
 import 'data/repository_contracts/auth_repository_contract.dart';
-import 'models/dfapi_auth_request.dart';
 
 class DfApiApp extends StatefulWidget {
   final DfApiAuthRequest request;
@@ -74,6 +80,10 @@ class _DfApiApp extends State<DfApiApp> {
             } else if (state is UnAuthenticated)
               return request.loginWidget ?? LoginPage();
             else if (state is Authenticated) {
+              Timer(
+                Duration(seconds: state.tokenRefreshInterval),
+                () => authBloc..add(TokenExpired()),
+              );
               DfApiApp.token = state.token;
               DfApiApp.userInfo = state.userInfo;
 

@@ -25,13 +25,14 @@ class _AppState extends State<App> {
           child: DfApiApp(
             request: DfApiAuthRequest(
               child: Container(
-                  color: Colors.white,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      DfApiApp.functions.logOut();
-                    },
-                    child: Text("Log Out"),
-                  )),
+                color: Colors.white,
+                child: OutlinedButton(
+                  onPressed: () {
+                    DfApiApp.functions.logOut();
+                  },
+                  child: Text("Log Out"),
+                ),
+              ),
               configuration: demoIdentityServerConfig,
             ),
           ),

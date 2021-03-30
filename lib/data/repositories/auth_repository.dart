@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dfapi_auth/models/dfapi_user_info.dart';
 import 'package:dfapi_auth/models/login_model.dart';
+import 'package:dfapi_auth/models/refresh_token_response.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,7 @@ class AuthRepository implements AuthRepositoryContract {
   final AuthConfig config;
 
   final String _tokenKey = "DfApiAuthTokenKey";
+  final String _refreshTokenKey = "DfApiAuthRefreshTokenKey";
   final String _tokenExpireDateKey = "DfApiAuthTokeExpireDateKey";
   final String _userInfoKey = "DfApiAuthUserInfoKey";
 
@@ -49,6 +51,11 @@ class AuthRepository implements AuthRepositoryContract {
           AuthenticationResponse.fromJson(jsonDecode(loginResponse.body));
 
       await _pref.setString(_tokenKey, response.token);
+      await _pref.setString(_refreshTokenKey, response.refreshToken);
+      await _pref.setInt(
+        _tokenExpireDateKey,
+        response.tokenExpireDate.millisecondsSinceEpoch,
+      );
       await _pref.setString(_userInfoKey, jsonEncode(response.userInfo.asJson));
       await _pref.setString(_usernameKey, model.username);
       await _pref.setString(_passwordKey, model.password);
@@ -91,10 +98,25 @@ class AuthRepository implements AuthRepositoryContract {
 
   @override
   Response<AuthenticationResponse> getAuthData() {
+    if (!_pref.containsKey(_tokenExpireDateKey))
+      return Response.error("Token expire date not found!");
+
+    var tokenExpireDate = DateTime.fromMillisecondsSinceEpoch(
+      _pref.getInt(_tokenExpireDateKey),
+    );
+
+    if (DateTime.now().isAfter(tokenExpireDate))
+      return Response.error("Token Expired");
+
     if (!_pref.containsKey(_tokenKey))
       return Response.error("Unauthorized User!");
 
     var token = _pref.getString(_tokenKey);
+
+    if (!_pref.containsKey(_refreshTokenKey))
+      return Response.error("Refresh token not found! ");
+
+    var refreshToken = _pref.getString(_refreshTokenKey);
 
     if (!_pref.containsKey(_userInfoKey))
       return Response.error("User data not found!");
@@ -103,6 +125,70 @@ class AuthRepository implements AuthRepositoryContract {
       jsonDecode(_pref.getString(_userInfoKey)),
     );
 
-    return Response.success(AuthenticationResponse(token, userInfo));
+    return Response.success(
+      AuthenticationResponse(
+        token,
+        userInfo,
+        refreshToken,
+        tokenExpireDate,
+      ),
+    );
+  }
+
+  @override
+  Future<Response<AuthenticationResponse>> refreshToken() async {
+    try {
+      var authDataResponse = getAuthData();
+      if (!authDataResponse.isSuccess)
+        return Response.error(authDataResponse.errorMessage);
+
+      var data = {"RefreshToken": authDataResponse.value.refreshToken};
+
+      final http.Response refreshTokenResponse = await http.post(
+        config.refreshTokenUrl,
+        headers: {
+          "content-type": "application/json",
+          "Authorization": "Bearer ${authDataResponse.value.token}"
+        },
+        body: jsonEncode(data),
+      );
+
+      if (refreshTokenResponse.statusCode != 200)
+        return Response.error(
+          "Unexpected Error Has Occured!\n" +
+              "STATUS CODE: ${refreshTokenResponse.statusCode}\n" +
+              "${refreshTokenResponse.reasonPhrase}",
+        );
+
+      var response = RefreshTokenResponse.fromJson(
+        jsonDecode(refreshTokenResponse.body),
+      );
+
+      await _pref.setString(_tokenKey, response.token);
+      await _pref.setString(_refreshTokenKey, response.refreshToken);
+      await _pref.setInt(
+        _tokenExpireDateKey,
+        response.tokenExpireDate.millisecondsSinceEpoch,
+      );
+
+      authDataResponse.value.token = response.token;
+      authDataResponse.value.refreshToken = response.refreshToken;
+      authDataResponse.value.tokenExpireDate = response.tokenExpireDate;
+
+      return authDataResponse;
+    } catch (e) {
+      return Response.error(e.toString());
+    }
+  }
+
+  @override
+  Response<LoginModel> getLoginData() {
+    if (!_pref.containsKey(_usernameKey) || !_pref.containsKey(_passwordKey))
+      return Response.error("User data not found!");
+
+    var username = _pref.getString(_usernameKey);
+    var password = _pref.getString(_passwordKey);
+
+    return Response.success(LoginModel(username, password));
   }
 }

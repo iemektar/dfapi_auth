@@ -23,16 +23,22 @@ class UnAuthenticated extends AuthState {}
 
 class Authenticated extends AuthState {
   final String token;
+  final DateTime tokenExpireDate;
   final DfApiUserInfo userInfo;
 
-  Authenticated(this.token, this.userInfo);
+  int get tokenRefreshInterval => tokenExpireDate
+      .difference(DateTime.now().add(Duration(seconds: 5 * 60)))
+      .inSeconds;
+
+  Authenticated(this.token, this.userInfo, this.tokenExpireDate);
 
   Authenticated.fromResponse(Response<AuthenticationResponse> response)
       : token = response.value.token,
-        userInfo = response.value.userInfo;
+        userInfo = response.value.userInfo,
+        tokenExpireDate = response.value.tokenExpireDate;
 
   @override
-  List<Object> get props => [token];
+  List<Object> get props => [token, tokenExpireDate];
 }
 
 class Failed extends AuthState {
