@@ -73,14 +73,14 @@ class AuthRepository implements AuthRepositoryContract {
     try {
       var token = _pref.getString(_tokenKey);
 
+      await clearData();
+
       if (!config.isRootPath(config.logutUrl)) {
         await http.get(
           config.logutUrl,
           headers: {"Authorization": "Bearer $token"},
         );
       }
-
-      await clearData();
       return Response();
     } catch (e) {
       return Response.error(
@@ -94,6 +94,9 @@ class AuthRepository implements AuthRepositoryContract {
     await _pref.remove(_tokenKey);
     await _pref.remove(_userInfoKey);
     await _pref.remove(_tokenExpireDateKey);
+    await _pref.remove(_refreshTokenKey);
+    await _pref.remove(_usernameKey);
+    await _pref.remove(_passwordKey);
   }
 
   @override
