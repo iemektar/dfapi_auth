@@ -50,6 +50,8 @@ class AuthRepository implements AuthRepositoryContract {
       var response =
           AuthenticationResponse.fromJson(jsonDecode(loginResponse.body));
 
+      if (!response.isSuccess) return Response.error(response.errorMessage);
+
       await _pref.setString(_tokenKey, response.token);
       await _pref.setString(_refreshTokenKey, response.refreshToken);
       await _pref.setInt(
@@ -63,8 +65,9 @@ class AuthRepository implements AuthRepositoryContract {
       return Response.success(response);
     } catch (e) {
       return Response.error(
-          "Unexpected error has occured while authetication ... \n\n" +
-              e.toString());
+        "Unexpected error has occured while authetication ... \n\n" +
+            e.toString(),
+      );
     }
   }
 

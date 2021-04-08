@@ -1,6 +1,10 @@
+import 'package:custom_response/custom_response.dart';
 import 'package:dfapi_auth/models/dfapi_user_info.dart';
 
 class AuthenticationResponse {
+  bool isSuccess;
+  String errorMessage;
+
   String token;
   String refreshToken;
   DateTime tokenExpireDate;
@@ -17,13 +21,15 @@ class AuthenticationResponse {
         this.tokenExpireDate = tokenExpireDate;
 
   AuthenticationResponse.fromJson(Map<String, dynamic> json) {
-    if (json["isSuccess"]) {
+    isSuccess = json["isSuccess"];
+    if (isSuccess) {
       var data = json["data"];
       token = data["accessToken"];
       refreshToken = data["refreshToken"];
       var milliseconds = data["tokenExpireTimestamp"] as int;
       tokenExpireDate = DateTime.fromMillisecondsSinceEpoch(milliseconds);
       userInfo = DfApiUserInfo.fromJson(data);
-    }
+    } else
+      errorMessage = json["message"];
   }
 }

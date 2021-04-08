@@ -23,14 +23,14 @@ class DfApiErrorPage extends StatelessWidget {
                 Icon(
                   MaterialCommunityIcons.close_circle_outline,
                   color: Colors.red[300],
-                  size: 40,
+                  size: 35,
                 ),
                 SizedBox(width: 10),
                 Text(
                   "ERROR!",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 40,
+                    fontSize: 35,
                     color: Colors.red[300],
                   ),
                 ),
