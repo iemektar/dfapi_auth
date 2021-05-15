@@ -1,6 +1,6 @@
 name: dfapi_auth
 description: DfApi Authetication based on flutter_appauth package and identity server.
-version: 1.0.3
+version: 1.0.4
 repository: https://github.com/iemektar/dfapi_auth
 
 environment:
@@ -13,7 +13,7 @@ dependencies:
   flutter_bloc: ^6.1.1
   get_it: ^5.0.6
   shared_preferences: ^2.0.5
-  http: ^0.12.2
+  http: ^0.13.3
   equatable: ^2.0.0
   custom_response: ^0.0.1
   flutter_icons: ^1.1.0

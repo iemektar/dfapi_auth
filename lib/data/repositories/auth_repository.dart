@@ -35,7 +35,7 @@ class AuthRepository implements AuthRepositoryContract {
         "Password": model.password,
       };
       final http.Response loginResponse = await http.post(
-        config.loginUrl,
+        Uri.parse(config.loginUrl),
         headers: {"content-type": "application/json"},
         body: jsonEncode(data),
       );
@@ -80,7 +80,7 @@ class AuthRepository implements AuthRepositoryContract {
 
       if (!config.isRootPath(config.logutUrl)) {
         await http.get(
-          config.logutUrl,
+          Uri.parse(config.logutUrl),
           headers: {"Authorization": "Bearer $token"},
         );
       }
@@ -151,7 +151,7 @@ class AuthRepository implements AuthRepositoryContract {
       var data = {"RefreshToken": authDataResponse.value.refreshToken};
 
       final http.Response refreshTokenResponse = await http.post(
-        config.refreshTokenUrl,
+        Uri.parse(config.refreshTokenUrl),
         headers: {
           "content-type": "application/json",
           "Authorization": "Bearer ${authDataResponse.value.token}"
